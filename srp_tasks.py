@@ -1,21 +1,26 @@
 # srp_tasks.py
 from abc import ABC, abstractmethod
 
+from django.tasks import task
+
 class Task:
-    def __init__(self, task_id, description, due_date=None, completed=False):
+    # แก้ไข __init__ ใน Class Task
+    def __init__(self, task_id, description, due_date=None, completed=False, priority="medium"):
         self.id = task_id
         self.description = description
         self.due_date = due_date
         self.completed = completed
+        self.priority = priority
 
     def mark_completed(self):
         self.completed = True
         print(f"Task {self.id} '{self.description}' marked as completed.")
 
+    # แก้ไข __str__ ใน Class Task
     def __str__(self):
         status = "✓" if self.completed else " "
         due = f" (Due: {self.due_date})" if self.due_date else ""
-        return f"[{status}] {self.id}. {self.description}{due}"
+        return f"[{status}] {self.id}. {self.description} [Priority: {self.priority}]{due}"
 
 
 # Abstract Class สำหรับกำหนดรูปแบบการเก็บข้อมูล (ตามหลัก OCP)
@@ -65,8 +70,9 @@ class TaskManager:
         self.next_id = max([t.id for t in self.tasks] + [0]) + 1 if self.tasks else 1
         print(f"Loaded {len(self.tasks)} tasks. Next ID: {self.next_id}")
 
-    def add_task(self, description, due_date=None):
-        task = Task(self.next_id, description, due_date)
+    # แก้ไข add_task ใน Class TaskManager
+    def add_task(self, description, due_date=None, priority="medium"):
+        task = Task(self.next_id, description, due_date, priority=priority)
         self.tasks.append(task)
         self.next_id += 1
         self.storage.save_tasks(self.tasks)
